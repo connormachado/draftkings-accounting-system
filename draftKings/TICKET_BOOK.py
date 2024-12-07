@@ -1,9 +1,10 @@
 class TicketBook():
     def __init__(self):
-        self.cash = 0.0              # Asset
-        self.tickets = []            # List of ALL tickets
-        self.payouts = 0.0           # Deferred Revenue Asset
-        self.outstanding_bets = 0.0  # Liability
+        self.cash = 0.0                     # Asset
+        self.tickets = []                   # List of ALL tickets
+        self.payouts = 0.0                  # Deferred Revenue Asset
+        self.outstanding_bets_cash = 0.0    # Liability
+        self.outstanding_bets_bonus = 0.0   # SUPER ASSET FREE MONEY
 
     
     def deposit(self, amount):
@@ -21,17 +22,23 @@ class TicketBook():
 
     
     def add_ticket(self, ticket):
-        if self.cash < ticket.wager:
-            print("-------------------------------------------------")
-            raise ValueError("You don't have the money to make this bet.🤨")
+        if not ticket.bonus_wager:
 
-        if any(t.ID == ticket.ID and t.date == ticket.date and t.wager == ticket.wager for t in self.tickets):
-            print("-------------------------------------------------")
-            raise ValueError("Error: Ticket already exists.🤨")
+            if self.cash < ticket.wager:
+                print("-------------------------------------------------")
+                raise ValueError("You don't have the money to make this bet.🤨")
 
-        self.cash -= ticket.wager               # Credit Cash
+            if any(t.ID == ticket.ID and t.date == ticket.date and t.wager == ticket.wager for t in self.tickets):
+                print("-------------------------------------------------")
+                raise ValueError("Error: Ticket already exists.🤨")
+
+            self.cash -= ticket.wager               # Credit Cash
+            self.outstanding_bets_cash += ticket.wager   # Debit Outstanding Bets
+        else:
+
+            self.outstanding_bets_bonus += ticket.wager
+        
         self.payouts += ticket.payout           # Debit Deferred Revenue
-        self.outstanding_bets += ticket.wager   # Debit Outstanding Bets
         self.tickets.append(ticket)
         self.recalculate()
 
@@ -43,7 +50,11 @@ class TicketBook():
         if not ticket.settled:
             self.cash += ticket.payout              # Debit Cash 
             self.payouts -= ticket.payout           # Credit Deferred Revenue
-            self.outstanding_bets -= ticket.wager   # Credit Outstanding Bets
+            if not ticket.bonus_wager:
+                self.outstanding_bets_cash -= ticket.wager   # Credit Outstanding Bet Cash
+            else:
+                self.outstanding_bets_bonus -= ticket.wager  # Credit Outstanding Bet Bonus
+
             ticket.settle()
             self.recalculate()
         else:
@@ -54,7 +65,11 @@ class TicketBook():
 
     def process_loss(self, ticket):
         if not ticket.settled:
-            self.outstanding_bets -= ticket.wager   # Credit Outstanding Bets
+            if not ticket.bonus_wager:
+                self.outstanding_bets_cash -= ticket.wager   # Credit Outstanding Bets Cash
+            else:
+                self.outstanding_bets_bonus -= ticket.wager  # Credit Outstanding Bets Bonus Bets
+            
             self.payouts -= ticket.wager            # Credit Deferred Revenue
             ticket.settle()
             self.recalculate()
@@ -68,7 +83,8 @@ class TicketBook():
         unsettled = len([ticket for ticket in self.tickets if not ticket.settled])
 
         print(f"Cash: ${self.cash:.2f}")
-        print(f"Outstanding Bets : ${self.outstanding_bets:.2f}")
+        print(f"Outstanding Bets (Cash Wagers): ${self.outstanding_bets_cash:.2f}")
+        print(f"Outstanding Bets (Bonus Wagers): ${self.outstanding_bets_bonus:.2f}")
         print(f"Potential Payouts: ${self.payouts:.2f}")
         print(f"Number of Tickets: {len(self.tickets)}")
         print(f"Unsettled Tickets: {unsettled}")
@@ -76,4 +92,5 @@ class TicketBook():
 
     def recalculate(self):
         self.payouts = sum(ticket.payout for ticket in self.tickets if not ticket.settled)
-        self.outstanding_bets = sum(ticket.wager for ticket in self.tickets if not ticket.settled)
+        self.outstanding_bets_cash = sum(ticket.wager for ticket in self.tickets if not ticket.settled)
+        self.outstanding_bets_bonus = sum(t.wager for t in self.tickets if t.bonus_wager and not t.settled)

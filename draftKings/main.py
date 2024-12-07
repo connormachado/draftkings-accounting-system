@@ -2,8 +2,9 @@ import json
 from TICKET import Ticket
 from TICKET_BOOK import TicketBook
 
+LEDGER = "personal_ledger.json"
 
-def save_to_file(ticket_book, filename="TICKET_BOOK.json"):
+def save_to_file(ticket_book, filename=LEDGER):
     data = {
         "cash": ticket_book.cash,
         "outstanding_bets": ticket_book.outstanding_bets,
@@ -15,7 +16,8 @@ def save_to_file(ticket_book, filename="TICKET_BOOK.json"):
                 "wager": t.wager,
                 "payout": t.payout,
                 "parlay": t.parlay,
-                "settled": t.settled
+                "settled": t.settled,
+                "bonus_wager":t.bonus_wager
             }
             for t in ticket_book.tickets
         ]
@@ -24,7 +26,7 @@ def save_to_file(ticket_book, filename="TICKET_BOOK.json"):
         json.dump(data, f)
 
 
-def load_from_file(ticket_book, filename="TICKET_BOOK.json"):
+def load_from_file(ticket_book, filename=LEDGER):
     try:
         with open(filename, "r") as f:
             data = json.load(f)
@@ -38,7 +40,8 @@ def load_from_file(ticket_book, filename="TICKET_BOOK.json"):
                     wager=entry["wager"],
                     payout=entry["payout"],
                     parlay=entry["parlay"],
-                    settled=entry["settled"]# == "true"
+                    settled=entry["settled"],
+                    bonus_wager=entry["bonus_wager"]
                 )
                 ticket_book.tickets.append(ticket)
     except FileNotFoundError:
@@ -63,11 +66,24 @@ if __name__ == "__main__":
             print("Fill out ticket info...")
             ID = str( input("Game ID (ex BOS CELTICS): "))
             DATE = str( input("Date (mm-dd-yyyy): ") )
-            WAGER = float( input("Wager (xx.xx): ") )
+            WAGER = input("Wager (xx.xx): ") # Logic to handle bad inputs ✅
             PAYOUT = float( input("Payout (xx.xx): ") )
             PARLAY = False if input("Parlay (t/f): ") == "f" else True
 
-            new_ticket = Ticket(ID, DATE, WAGER, PAYOUT, PARLAY)
+            if type(WAGER) == str:
+                if "B:" in WAGER:
+                    WAGER = float( (WAGER.split(":"))[1] )
+                    new_ticket = Ticket(ID, DATE, WAGER, PAYOUT, PARLAY, bonus_wager=True)
+                else:
+                    print("Bruh WAGER has to be either a number or B:__, where __ is the amount of the bonus(free) bet.🤨")
+            else:
+                try:
+                    WAGER = float( WAGER )
+                    new_ticket = Ticket(ID, DATE, WAGER, PAYOUT, PARLAY)
+                except ValueError as VE:
+                    print(VE)
+                    print("Bruh WAGER has to be either a number or B:__, where __ is the amount of the bonus(free) bet.🤨")
+
             book.add_ticket(new_ticket)
 
             save_to_file(book)
@@ -75,7 +91,21 @@ if __name__ == "__main__":
         elif option == "w": # Update a ticket that won
             ID = str( input("Game ID (ex BOS CELTICS): "))
             DATE = str( input("Date (mm-dd-yyyy): ") )
-            WAGER = float( input("Wager (xx.xx): ") )
+            WAGER = input("Wager (xx.xx): ")
+
+            if type(WAGER) == str:
+                if "B:" in WAGER:
+                    WAGER = float( (WAGER.split(":"))[1] )
+                else:
+                    print("Bruh WAGER has to be either a number or B:__, where __ is the amount of the bonus(free) bet.🤨")
+            else:
+                try:
+                    WAGER = float( WAGER )
+                    new_ticket = Ticket(ID, DATE, WAGER, PAYOUT, PARLAY)
+                except ValueError as VE:
+                    print(VE)
+                    print("Bruh WAGER has to be either a number or B:__, where __ is the amount of the bonus(free) bet.🤨")
+
 
             if WAGER < 0:
                 print("-------------------------------------------------")
@@ -93,7 +123,7 @@ if __name__ == "__main__":
                 print("No matching unsettled ticket found.🤨")
         
 
-        elif option == "l": # Update a ticket that lsot
+        elif option == "l": # Update a ticket that lost
             ID = str( input("Game ID (ex BOS CELTICS): "))
             DATE = str( input("Date (mm-dd-yyyy): ") )
             WAGER = float( input("Wager (xx.xx): ") )
