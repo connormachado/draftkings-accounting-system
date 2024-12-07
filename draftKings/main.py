@@ -70,12 +70,9 @@ if __name__ == "__main__":
             PAYOUT = float( input("Payout (xx.xx): ") )
             PARLAY = False if input("Parlay (t/f): ") == "f" else True
 
-            if type(WAGER) == str:
-                if "B:" in WAGER:
-                    WAGER = float( (WAGER.split(":"))[1] )
-                    new_ticket = Ticket(ID, DATE, WAGER, PAYOUT, PARLAY, bonus_wager=True)
-                else:
-                    print("Bruh WAGER has to be either a number or B:__, where __ is the amount of the bonus(free) bet.🤨")
+            if type(WAGER) == str and "B:" in WAGER:
+                WAGER = float( (WAGER.split(":"))[1] )
+                new_ticket = Ticket(ID, DATE, WAGER, PAYOUT, PARLAY, bonus_wager=True)
             else:
                 try:
                     WAGER = float( WAGER )
@@ -85,7 +82,6 @@ if __name__ == "__main__":
                     print("Bruh WAGER has to be either a number or B:__, where __ is the amount of the bonus(free) bet.🤨")
 
             book.add_ticket(new_ticket)
-
             save_to_file(book)
 
         elif option == "w": # Update a ticket that won
@@ -93,15 +89,11 @@ if __name__ == "__main__":
             DATE = str( input("Date (mm-dd-yyyy): ") )
             WAGER = input("Wager (xx.xx): ")
 
-            if type(WAGER) == str:
-                if "B:" in WAGER:
-                    WAGER = float( (WAGER.split(":"))[1] )
-                else:
-                    print("Bruh WAGER has to be either a number or B:__, where __ is the amount of the bonus(free) bet.🤨")
+            if type(WAGER) == str and "B:" in WAGER:
+                WAGER = float( (WAGER.split(":"))[1] )
             else:
                 try:
                     WAGER = float( WAGER )
-                    new_ticket = Ticket(ID, DATE, WAGER, PAYOUT, PARLAY)
                 except ValueError as VE:
                     print(VE)
                     print("Bruh WAGER has to be either a number or B:__, where __ is the amount of the bonus(free) bet.🤨")
