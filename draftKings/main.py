@@ -62,7 +62,7 @@ if __name__ == "__main__":
         if option == "a": # Add a new ticket
             print("Fill out ticket info...")
             ID = str( input("Game ID (ex BOS CELTICS): "))
-            DATE = str( input("Date (dd-mm-yyyy): ") )
+            DATE = str( input("Date (mm-dd-yyyy): ") )
             WAGER = float( input("Wager (xx.xx): ") )
             PAYOUT = float( input("Payout (xx.xx): ") )
             PARLAY = False if input("Parlay (t/f): ") == "f" else True
@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
         elif option == "w": # Update a ticket that won
             ID = str( input("Game ID (ex BOS CELTICS): "))
-            DATE = str( input("Date (dd-mm-yyyy): ") )
+            DATE = str( input("Date (mm-dd-yyyy): ") )
             WAGER = float( input("Wager (xx.xx): ") )
 
             if WAGER < 0:
@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
         elif option == "l": # Update a ticket that lsot
             ID = str( input("Game ID (ex BOS CELTICS): "))
-            DATE = str( input("Date (dd-mm-yyyy): ") )
+            DATE = str( input("Date (mm-dd-yyyy): ") )
             WAGER = float( input("Wager (xx.xx): ") )
 
             ticket = next((t for t in book.tickets if t.date == DATE and t.ID == ID and t.wager == WAGER and not t.settled), None)
