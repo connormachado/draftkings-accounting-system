@@ -100,10 +100,6 @@ if __name__ == "__main__":
             break
             
         elif option == "d": #Deposit Cash
-            print("-------------------------------------------------")
             amount = input("How much would you like to deposit (xx.xx): ")
-
-            try:
-                book.deposit(amount)
-            except ValueError as e:
-                print(e)
+            book.deposit(amount)
+            save_to_file(book, LEDGER)
