@@ -10,7 +10,7 @@ class Ticket():
         self.won = won
 
     def __repr__(self):
-        return f" Ticket || ID={self.ID}, date={self.date}, wager={self.wager}, parlay={self.parlay}, payout={self.payout}, settled={self.settled}, bonus={self.bonus_wager}, won={self.won})"
+        return f" Ticket || ID={self.ID}, date={self.date}, wager={self.wager}, payout={self.payout}, parlay={self.parlay}, settled={self.settled}, bonus={self.bonus_wager}, won={self.won})"
     
     def settle(self, won:bool):
         self.settled = True
