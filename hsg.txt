@@ -1,1 +1,0 @@
-{"cash": 20.0, "outstanding_bets": 0, "payouts": 0, "tickets": [{"ID": "1", "date": "1", "wager": 20.0, "payout": 40.0, "parlay": false, "settled": true}]}
