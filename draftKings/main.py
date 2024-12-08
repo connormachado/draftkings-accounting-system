@@ -1,62 +1,17 @@
 import json
 from TICKET import Ticket
 from TICKET_BOOK import TicketBook
+from save_to_file import save_to_file
+from load_from_file import load_from_file
 
 # LEDGER = "personal_ledger.json"
 LEDGER = "LEDGER.json"
-
-def save_to_file(ticket_book, filename=LEDGER):
-    data = {
-        "cash": ticket_book.cash,
-        "outstanding_bets_cash": ticket_book.outstanding_bets_cash,
-        "outstanding_bets_bonus": ticket_book.outstanding_bets_bonus,
-        "payouts": ticket_book.payouts,
-        "tickets": [
-            {
-                "ID": t.ID,
-                "date": t.date,
-                "wager": t.wager,
-                "payout": t.payout,
-                "parlay": t.parlay,
-                "settled": t.settled,
-                "bonus_wager":t.bonus_wager,
-                "won":t.won
-            }
-            for t in ticket_book.tickets
-        ]
-    }
-    with open(filename, "w") as f:
-        json.dump(data, f)
-
-
-def load_from_file(ticket_book, filename=LEDGER):
-    try:
-        with open(filename, "r") as f:
-            data = json.load(f)
-            ticket_book.cash = data.get("cash", 0.0)
-            ticket_book.outstanding_bets = data.get("outstanding_bets_cash", 0.0)
-            ticket_book.outstanding_bets_bonus = data.get("outstanding_bets_bonus", 0.0)
-            ticket_book.payouts = data.get("payouts", 0.0)
-            for entry in data.get("tickets", []):
-                ticket = Ticket(
-                    ID=entry["ID"],
-                    date=entry["date"],
-                    wager=entry["wager"],
-                    payout=entry["payout"],
-                    parlay=entry["parlay"],
-                    settled=entry["settled"],
-                    bonus_wager=entry["bonus_wager"],
-                    won=entry["won"]
-                )
-                ticket_book.tickets.append(ticket)
-    except FileNotFoundError:
-        pass  # No file means no tickets yet
 
 if __name__ == "__main__":
     print("Welcome to your DraftKings Ticket Book!")
 
     book = TicketBook()
-    load_from_file(book)
+    load_from_file(book, LEDGER)
     book.recalculate()
 
 
@@ -87,7 +42,7 @@ if __name__ == "__main__":
                     print("Bruh WAGER has to be either a number or B:__, where __ is the amount of the bonus(free) bet.🤨")
 
             book.add_ticket(new_ticket)
-            save_to_file(book)
+            save_to_file(book, LEDGER)
 
         elif option == "w": # Update a ticket that won
             ID = str( input("Game ID (ex BOS CELTICS): "))
@@ -112,7 +67,7 @@ if __name__ == "__main__":
 
             if ticket:
                 book.process_win(ticket)
-                save_to_file(book)
+                save_to_file(book, LEDGER)
 
                 print("-------------------------------------------------")
                 print("Ticket marked as WON!")
@@ -130,7 +85,7 @@ if __name__ == "__main__":
 
             if ticket:
                 book.process_loss(ticket)
-                save_to_file(book)
+                save_to_file(book, LEDGER)
 
                 print("-------------------------------------------------")
                 print("Ticket marked as lost!")
