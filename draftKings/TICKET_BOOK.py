@@ -19,6 +19,7 @@ class TicketBook():
                 raise ValueError("Deposit must be greater than zero.🤨")
             else:
                 self.cash += amount
+                self.cash = round(self.cash, 2)
                 print(f"Deposited ${amount:.2f}. Current cash: ${self.cash:.2f}")
         except ValueError as e:
             print(e)
@@ -88,7 +89,7 @@ class TicketBook():
         # print(self.tickets)
         unsettled = len([ticket for ticket in self.tickets if not ticket.settled])
 
-        print(f"Cash: ${self.cash:.2f}")
+        print(f"Cash: ${round(self.cash, 2):.2f}")
         print(f"Outstanding Bets (Cash Wagers): ${self.outstanding_bets_cash:.2f}")
         print(f"Outstanding Bets (Bonus Wagers): ${self.outstanding_bets_bonus:.2f}")
         print(f"Potential Payouts: ${self.payouts:.2f}")
