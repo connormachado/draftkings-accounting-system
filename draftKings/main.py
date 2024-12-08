@@ -2,12 +2,14 @@ import json
 from TICKET import Ticket
 from TICKET_BOOK import TicketBook
 
-LEDGER = "personal_ledger.json"
+# LEDGER = "personal_ledger.json"
+LEDGER = "LEDGER.json"
 
 def save_to_file(ticket_book, filename=LEDGER):
     data = {
         "cash": ticket_book.cash,
-        "outstanding_bets": ticket_book.outstanding_bets,
+        "outstanding_bets_cash": ticket_book.outstanding_bets_cash,
+        "outstanding_bets_bonus": ticket_book.outstanding_bets_bonus,
         "payouts": ticket_book.payouts,
         "tickets": [
             {
@@ -17,7 +19,8 @@ def save_to_file(ticket_book, filename=LEDGER):
                 "payout": t.payout,
                 "parlay": t.parlay,
                 "settled": t.settled,
-                "bonus_wager":t.bonus_wager
+                "bonus_wager":t.bonus_wager,
+                "won":t.won
             }
             for t in ticket_book.tickets
         ]
@@ -31,7 +34,8 @@ def load_from_file(ticket_book, filename=LEDGER):
         with open(filename, "r") as f:
             data = json.load(f)
             ticket_book.cash = data.get("cash", 0.0)
-            ticket_book.outstanding_bets = data.get("outstanding_bets", 0.0)
+            ticket_book.outstanding_bets = data.get("outstanding_bets_cash", 0.0)
+            ticket_book.outstanding_bets_bonus = data.get("outstanding_bets_bonus", 0.0)
             ticket_book.payouts = data.get("payouts", 0.0)
             for entry in data.get("tickets", []):
                 ticket = Ticket(
@@ -41,7 +45,8 @@ def load_from_file(ticket_book, filename=LEDGER):
                     payout=entry["payout"],
                     parlay=entry["parlay"],
                     settled=entry["settled"],
-                    bonus_wager=entry["bonus_wager"]
+                    bonus_wager=entry["bonus_wager"],
+                    won=entry["won"]
                 )
                 ticket_book.tickets.append(ticket)
     except FileNotFoundError:
@@ -72,11 +77,11 @@ if __name__ == "__main__":
 
             if type(WAGER) == str and "B:" in WAGER:
                 WAGER = float( (WAGER.split(":"))[1] )
-                new_ticket = Ticket(ID, DATE, WAGER, PAYOUT, PARLAY, bonus_wager=True)
+                new_ticket = Ticket(ID, DATE, WAGER, PAYOUT, parlay=PARLAY, bonus_wager=True)
             else:
                 try:
                     WAGER = float( WAGER )
-                    new_ticket = Ticket(ID, DATE, WAGER, PAYOUT, PARLAY)
+                    new_ticket = Ticket(ID, DATE, WAGER, PAYOUT, parlay=PARLAY)
                 except ValueError as VE:
                     print(VE)
                     print("Bruh WAGER has to be either a number or B:__, where __ is the amount of the bonus(free) bet.🤨")
@@ -109,6 +114,7 @@ if __name__ == "__main__":
                 book.process_win(ticket)
                 save_to_file(book)
 
+                print("-------------------------------------------------")
                 print("Ticket marked as WON!")
             else:
                 print("-------------------------------------------------")
@@ -126,6 +132,7 @@ if __name__ == "__main__":
                 book.process_loss(ticket)
                 save_to_file(book)
 
+                print("-------------------------------------------------")
                 print("Ticket marked as lost!")
             else:
                 print("No matching unsettled ticket found.")
